@@ -1,0 +1,27 @@
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* When user is NOT logged in */
+body.not-authenticated .role-logged-in {
+    display: none;
+}
+
+/* When user IS logged in */
+body.authenticated .role-logged-out {
+    display: none;
+}
+
+/* Admin links hidden by default */
+.role-admin {
+    display: none;
+}
+
+/* Show admin links only for admin users */
+body.is-admin .role-admin {
+    display: block;
+}
