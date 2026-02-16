@@ -1,145 +1,111 @@
+// Initial Configuration & Database Seed [cite: 1, 344]
+const STORAGE_KEY = 'ipt_demo_v1';
 let currentUser = null;
 
+window.db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+    accounts: [
+        { email: 'admin@example.com', password: 'Password123!', role: 'admin', verified: true, firstName: 'Admin', lastName: 'User' }
+    ],
+    employees: [],
+    departments: [{ name: 'Engineering' }, { name: 'HR' }]
+};
+
+// Persistence [cite: 1, 498]
+function saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(window.db));
+}
+
+// SPA Routing Engine [cite: 1, 331]
+function handleRouting() {
+    const hash = window.location.hash || '#/';
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(p => p.classList.remove('active'));
+
+    const activePageId = hash === '#/' ? 'home-page' : hash.replace('#/', '') + '-page';
+    const activePage = document.getElementById(activePageId);
+    
+    if (activePage) {
+        activePage.classList.add('active');
+    }
+
+    // Protection [cite: 442]
+    if (['#/profile', '#/employees'].includes(hash) && !currentUser) {
+        window.location.hash = '#/login';
+    }
+}
+
+// Auth State Management [cite: 1, 339]
 function setAuthState(isAuth, user = null) {
     currentUser = user;
-    document.body.classList.toggle("authenticated", isAuth);
-    document.body.classList.toggle("not-authenticated", !isAuth);
-
-    // Update navbar username
-    const usernameSpan = document.getElementById("nav-username");
-    if (user) usernameSpan.textContent = user.firstName || "User";
-
-    // Add admin class if user is admin
-    if (user?.role === "admin") {
-        document.body.classList.add("is-admin");
+    const body = document.body;
+    if (isAuth) {
+        body.classList.replace('not-authenticated', 'authenticated');
+        if (user.role === 'admin') body.classList.add('is-admin');
+        renderProfile();
     } else {
-        document.body.classList.remove("is-admin");
-    }
-
-    // Show/hide navbar links
-    document.querySelectorAll(".role-logged-in").forEach(el => el.style.display = isAuth ? "block" : "none");
-    document.querySelectorAll(".role-logged-out").forEach(el => el.style.display = isAuth ? "none" : "block");
-    document.querySelectorAll(".role-admin").forEach(el => el.style.display = (isAuth && user?.role === "admin") ? "block" : "none");
-}
-
-// Auto-login if auth_token exists
-const token = localStorage.getItem("auth_token");
-if (token) {
-    const user = window.db.accounts.find(acc => acc.email === token);
-    if (user) setAuthState(true, user);
-}
-
-
-// In-memory "database"
-window.db = window.db || { accounts: [] };
-
-// Load accounts from localStorage if exists
-const savedAccounts = localStorage.getItem("accounts");
-if (savedAccounts) {
-    window.db.accounts = JSON.parse(savedAccounts);
-}
-
-
-/* ROUTING */
-function navigateTo(hash) {
-    window.location.hash = hash;
-}
-
-function handleRouting() {
-    let hash = window.location.hash;
-
-    // If no hash, go to home
-    if (!hash) {
-        navigateTo("#/");
-        return;
-    }
-
-    // Hide all pages
-    const pages = document.querySelectorAll(".page");
-    pages.forEach(page => page.classList.remove("active"));
-
-    // ROUTING LOGIC
-    switch (hash) {
-        case "#/login":
-            document.getElementById("login-page").classList.add("active");
-            break;
-
-        case "#/register":
-            document.getElementById("register-page").classList.add("active");
-            break;
-
-        case "#/verify-email":
-            document.getElementById("verify-email-page").classList.add("active");
-            break;
-
-        case "#/profile":
-            // BLOCK if not logged in
-            if (!currentUser) {
-                navigateTo("#/login");
-                return;
-            }
-            document.getElementById("profile-page").classList.add("active");
-            break;
-
-        case "#/employees":
-        case "#/accounts":
-        case "#/departments":
-            // BLOCK if not admin
-            if (!currentUser || currentUser.role !== "admin") {
-                navigateTo("#/");
-                return;
-            }
-            document.getElementById(hash.replace("#/", "") + "-page")
-                .classList.add("active");
-            break;
-
-        case "#/requests":
-            if (!currentUser) {
-                navigateTo("#/login");
-                return;
-            }
-            document.getElementById("requests-page").classList.add("active");
-            break;
-
-        default:
-            document.getElementById("home-page").classList.add("active");
+        body.classList.replace('authenticated', 'not-authenticated');
+        body.classList.remove('is-admin');
     }
 }
 
-
-window.addEventListener("hashchange", handleRouting);
-handleRouting();
-
-// Initialize in-memory database
-window.db = window.db || { accounts: [] };
-
-// Registration form
-const registerForm = document.getElementById("register-form");
-if (registerForm) {
-  registerForm.addEventListener("submit", function(e) {
+// Registration Logic [cite: 1, 333]
+document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
 
-    const firstName = registerForm.firstName.value.trim();
-    const lastName = registerForm.lastName.value.trim();
-    const email = registerForm.email.value.trim();
-    const password = registerForm.password.value;
+    if (window.db.accounts.find(a => a.email === email)) return alert("Email exists!");
 
-    // Check if email already exists
-    const exists = window.db.accounts.find(acc => acc.email === email);
-    if (exists) {
-      alert("Email already registered");
-      return;
-    }
+    window.db.accounts.push({
+        email, password, role: 'user', verified: false,
+        firstName: document.getElementById('reg-firstname').value,
+        lastName: document.getElementById('reg-lastname').value
+    });
+    
+    localStorage.setItem('unverified_email', email);
+    saveToStorage();
+    window.location.hash = '#/verify-email';
+});
 
-    // Save new account
-    const newUser = { firstName, lastName, email, password, verified: false, role: "user" };
-    window.db.accounts.push(newUser);
-    localStorage.setItem("accounts", JSON.stringify(window.db.accounts));
-    localStorage.setItem("unverified_email", email);
-
-    alert("Registered successfully! Now verify your email.");
-    window.location.hash = "#/verify-email";
-  });
+// Simulation of Verification [cite: 1, 335]
+function simulateVerification() {
+    const email = localStorage.getItem('unverified_email');
+    const user = window.db.accounts.find(a => a.email === email);
+    if (user) user.verified = true;
+    saveToStorage();
+    alert("Email verified! You can now login.");
+    window.location.hash = '#/login';
 }
 
+// Login Logic [cite: 1, 474]
+document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
 
+    const user = window.db.accounts.find(a => a.email === email && a.password === pass && a.verified);
+    if (user) {
+        setAuthState(true, user);
+        window.location.hash = '#/profile';
+    } else {
+        alert("Invalid credentials or unverified account!");
+    }
+});
+
+function logout() {
+    setAuthState(false);
+    window.location.hash = '#/';
+}
+
+function renderProfile() {
+    if (!currentUser) return;
+    document.getElementById('profile-details').innerHTML = `
+        <p><strong>Name:</strong> ${currentUser.firstName} ${currentUser.lastName}</p>
+        <p><strong>Email:</strong> ${currentUser.email}</p>
+        <p><strong>Role:</strong> ${currentUser.role}</p>
+    `;
+}
+
+// Initialize
+window.addEventListener('hashchange', handleRouting);
+window.onload = handleRouting;

@@ -1,27 +1,14 @@
-.page {
-    display: none;
-}
+/* Page Visibility [cite: 11, 414] */
+.page { display: none; }
+.page.active { display: block; }
 
-.page.active {
-    display: block;
-}
+/* Auth State Visibility [cite: 12, 416] */
+body.not-authenticated .role-logged-in { display: none; }
+body.authenticated .role-logged-out { display: none; }
 
-/* When user is NOT logged in */
-body.not-authenticated .role-logged-in {
-    display: none;
-}
+/* Admin Visibility [cite: 13, 417] */
+.role-admin { display: none; }
+body.is-admin .role-admin { display: block; }
 
-/* When user IS logged in */
-body.authenticated .role-logged-out {
-    display: none;
-}
-
-/* Admin links hidden by default */
-.role-admin {
-    display: none;
-}
-
-/* Show admin links only for admin users */
-body.is-admin .role-admin {
-    display: block;
-}
+/* Basic Styling */
+section { padding: 20px; border-radius: 8px; background: #f8f9fa; }
