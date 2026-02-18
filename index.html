@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="not-authenticated">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
         <div class="container">
             <a class="navbar-brand" href="#/">Full-Stack App</a>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -16,11 +16,22 @@
                     <li class="nav-item role-logged-out"><a class="nav-link" href="#/login">Login</a></li>
                     <li class="nav-item role-logged-out"><a class="nav-link" href="#/register">Register</a></li>
                     
-                    <li class="nav-item role-admin"><a class="nav-link" href="#/employees">Employees</a></li>
-                    <li class="nav-item role-admin"><a class="nav-link" href="#/accounts">Accounts</a></li>
-                    
-                    <li class="nav-item role-logged-in"><a class="nav-link" href="#/profile">Profile</a></li>
-                    <li class="nav-item role-logged-in"><a class="nav-link" href="#/logout" onclick="logout()">Logout</a></li>
+                    <li class="nav-item dropdown role-logged-in">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="nav-username">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#/profile">Profile</a></li>
+                            
+                            <li class="role-admin"><a class="dropdown-item" href="#/employees">Employees</a></li>
+                            <li class="role-admin"><a class="dropdown-item" href="#/accounts">Accounts</a></li>
+                            <li class="role-admin"><a class="dropdown-item" href="#/departments">Departments</a></li>
+                            
+                            <li><a class="dropdown-item" href="#/requests">My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#/logout" onclick="logout()">Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -28,10 +39,41 @@
 
     <main class="container mt-5">
         <section id="home-page" class="page active">
-            <h1>Welcome to Full-Stack App</h1>
-            <p>A static prototype before backend integration[cite: 321].</p>
-            <a href="#/register" class="btn btn-primary">Get Started</a>
-        </section>
+    <div class="p-5 mb-4 bg-light rounded-3 border shadow-sm">
+        <div class="container-fluid py-4">
+
+            <h1 class="display-5 fw-bold mb-3">
+                Welcome to Full-Stack App
+            </h1>
+
+            <p class="fs-5 text-muted">
+                A static prototype before backend integration. Simulates:
+            </p>
+
+            <ul class="fs-6 mb-4">
+                <li>Email registration + fake verification</li>
+                <li>Login with JWT-like token simulation</li>
+                <li>Role-based UI (Admin/User)</li>
+                <li>CRUD for Employees, Departments, Requests</li>
+            </ul>
+
+            <div class="alert alert-info border-start border-4 border-warning d-flex align-items-center">
+                <div class="me-2">⚠️</div>
+                <div>
+                    <strong>Note:</strong> All data is stored in 
+                    <code>localStorage</code>. Refresh to reset.
+                </div>
+            </div>
+
+            <div class="mt-4 role-logged-out">
+                <a href="#/register" class="btn btn-primary btn-lg px-4">
+                    Get Started →
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
 
         <section id="register-page" class="page">
             <h2>Register Account</h2>
@@ -63,6 +105,44 @@
             <h2>My Profile</h2>
             <div id="profile-details"></div>
         </section>
+
+        <section id="employees-page" class="page">
+                <h2>Employees (Admin)</h2>
+
+                <button class="btn btn-success mb-3" onclick="addEmployeePrompt()">+ Add Employee</button>
+
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Dept</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employees-table"></tbody>
+                </table>
+         </section>
+
+         <section id="departments-page" class="page">
+                <h2>Departments (Admin)</h2>
+
+                <button class="btn btn-success mb-3" onclick="addDepartmentPrompt()">+ Add Department</button>
+
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departments-table"></tbody>
+                </table>
+        </section>
+
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

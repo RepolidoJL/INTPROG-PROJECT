@@ -21,30 +21,63 @@ function handleRouting() {
     const pages = document.querySelectorAll('.page');
     pages.forEach(p => p.classList.remove('active'));
 
-    const activePageId = hash === '#/' ? 'home-page' : hash.replace('#/', '') + '-page';
+    // Protection: must be logged in
+    if (
+        ['#/profile', '#/employees', '#/departments'].includes(hash) 
+        && !currentUser
+    ) {
+        window.location.hash = '#/login';
+        return;
+    }
+
+    // Admin-only protection
+    if (
+        ['#/employees', '#/departments'].includes(hash) 
+        && currentUser?.role !== 'admin'
+    ) {
+        window.location.hash = '#/';
+        return;
+    }
+
+    const activePageId = hash === '#/' 
+        ? 'home-page' 
+        : hash.replace('#/', '') + '-page';
+
     const activePage = document.getElementById(activePageId);
-    
+
     if (activePage) {
         activePage.classList.add('active');
     }
 
-    // Protection [cite: 442]
-    if (['#/profile', '#/employees'].includes(hash) && !currentUser) {
-        window.location.hash = '#/login';
-    }
+    // Render admin pages if needed
+    if (hash === '#/employees') renderEmployees();
+    if (hash === '#/departments') renderDepartments();
 }
 
 // Auth State Management [cite: 1, 339]
 function setAuthState(isAuth, user = null) {
     currentUser = user;
     const body = document.body;
+    const navUsername = document.getElementById('nav-username');
+
     if (isAuth) {
         body.classList.replace('not-authenticated', 'authenticated');
-        if (user.role === 'admin') body.classList.add('is-admin');
+        
+        // Updates the dropdown label with the user's name (e.g., "Admin" or "John")
+        if (navUsername && user) {
+            navUsername.innerText = user.firstName;
+        }
+
+        if (user.role === 'admin') {
+            body.classList.add('is-admin');
+        } else {
+            body.classList.remove('is-admin');
+        }
         renderProfile();
     } else {
         body.classList.replace('authenticated', 'not-authenticated');
         body.classList.remove('is-admin');
+        if (navUsername) navUsername.innerText = "User";
     }
 }
 
@@ -85,17 +118,20 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
     const user = window.db.accounts.find(a => a.email === email && a.password === pass && a.verified);
     if (user) {
-        setAuthState(true, user);
-        window.location.hash = '#/profile';
+    localStorage.setItem('auth_token', user.email);
+    setAuthState(true, user);
+    window.location.hash = '#/profile';
     } else {
         alert("Invalid credentials or unverified account!");
     }
 });
 
 function logout() {
+    localStorage.removeItem('auth_token');
     setAuthState(false);
     window.location.hash = '#/';
 }
+
 
 function renderProfile() {
     if (!currentUser) return;
@@ -106,6 +142,21 @@ function renderProfile() {
     `;
 }
 
+function checkAuthOnLoad() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
+    const user = window.db.accounts.find(a => a.email === token);
+    if (user) {
+        setAuthState(true, user);
+    }
+}
+
+
+
 // Initialize
 window.addEventListener('hashchange', handleRouting);
-window.onload = handleRouting;
+window.onload = () => {
+    checkAuthOnLoad();
+    handleRouting();
+};

@@ -12,3 +12,30 @@ body.is-admin .role-admin { display: block; }
 
 /* Basic Styling */
 section { padding: 20px; border-radius: 8px; background: #f8f9fa; }
+
+/* Red Logout text like in the screenshot */
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Ensure the admin links inside the dropdown hide/show correctly */
+.dropdown-item.role-admin {
+    display: none; 
+}
+
+body.is-admin .dropdown-item.role-admin {
+    display: block;
+}
+
+/* Fix for Bootstrap dropdowns and custom display classes */
+body.is-admin li.role-admin {
+    display: block !important;
+}
+
+#home-page ul {
+    padding-left: 20px;
+}
+
+.alert-info {
+    background-color: #d9f3f8;
+}
