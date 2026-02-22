@@ -1,41 +1,61 @@
-/* Page Visibility [cite: 11, 414] */
+/* ===== PAGE VISIBILITY SYSTEM ===== */
 .page { display: none; }
 .page.active { display: block; }
 
-/* Auth State Visibility [cite: 12, 416] */
+/* ===== AUTH-BASED VISIBILITY ===== */
 body.not-authenticated .role-logged-in { display: none; }
 body.authenticated .role-logged-out { display: none; }
 
-/* Admin Visibility [cite: 13, 417] */
+/* ===== ADMIN-ONLY ELEMENTS ===== */
 .role-admin { display: none; }
 body.is-admin .role-admin { display: block; }
 
-/* Basic Styling */
-section { padding: 20px; border-radius: 8px; background: #f8f9fa; }
+/* ===== GENERAL STYLES ===== */
+body {
+  background-color: #f5f5f5;
+  font-family: 'Segoe UI', sans-serif;
+}
+/* ===== PAGE VISIBILITY SYSTEM ===== */
+.page { display: none; }
+.page.active { display: block; }
 
-/* Red Logout text like in the screenshot */
-.text-danger {
-    color: #dc3545 !important;
+/* ===== AUTH-BASED VISIBILITY ===== */
+body.not-authenticated .role-logged-in { display: none; }
+body.authenticated .role-logged-out { display: none; }
+
+/* ===== ADMIN-ONLY ELEMENTS ===== */
+.role-admin { display: none; }
+body.is-admin .role-admin { display: block; }
+
+/* ===== GENERAL STYLES ===== */
+body {
+  background-color: #f5f5f5;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Ensure the admin links inside the dropdown hide/show correctly */
-.dropdown-item.role-admin {
-    display: none; 
+main {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-body.is-admin .dropdown-item.role-admin {
-    display: block;
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
-/* Fix for Bootstrap dropdowns and custom display classes */
-body.is-admin li.role-admin {
-    display: block !important;
+.card {
+  border-radius: 8px;
+}
+main {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-#home-page ul {
-    padding-left: 20px;
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
-.alert-info {
-    background-color: #d9f3f8;
+.card {
+  border-radius: 8px;
 }
